@@ -13,9 +13,8 @@ class Filme:
         self.ano = ano
         self.nota = nota
 
-
     def __str__(self):
-        return f"ID: {self.id}, Título: {self.titulo},  Genero: {self.genero},Ano: {self.ano}, Nota: {self.nota}"
+        return f"ID: {self.id}, Título: {self.titulo}, Genero: {self.genero}, Ano: {self.ano}, Nota: {self.nota}"
 
 class AtendimentoCliente(Thread):
 
@@ -34,7 +33,7 @@ class AtendimentoCliente(Thread):
                 break
 
             if funcao == 'c':  # Criar um novo filme
-                id = filmes.size()
+                id = len(filmes)
                 titulo_len = int.from_bytes(self.__socket_dados.recv(4), "big", signed=True)
                 titulo = self.__socket_dados.recv(titulo_len).decode()
                 genero_len = int.from_bytes(self.__socket_dados.recv(4), "big", signed=True)
@@ -42,11 +41,16 @@ class AtendimentoCliente(Thread):
                 ano = int.from_bytes(self.__socket_dados.recv(4), "big", signed=True)
                 nota = int.from_bytes(self.__socket_dados.recv(4), "big", signed=True)
                 filmes.append(Filme(id, titulo, ano, genero,nota))
-                resposta = f"Filme {titulo} criado com sucesso!".encode()
+                resposta = (1).to_bytes(4, "big", signed=True)
                 self.__socket_dados.send(resposta)
 
             elif funcao == 'r':  # Listar todos os filmes
-                resposta = "\n".join(str(filme) for filme in filmes).encode()
+                resposta = len(filmes).to_bytes(4, "big", signed=True)
+                for movie in filmes:
+                    aux_str = str(movie).encode()
+                    aux_tam = len(aux_str).to_bytes(4, "big", signed=True)
+                    resposta += aux_tam
+                    resposta += aux_str
                 self.__socket_dados.send(resposta)
 
             elif funcao == 'u':  # Atualizar um filme existente
@@ -55,11 +59,11 @@ class AtendimentoCliente(Thread):
                     if filme.id == id:
                         novo_nota = int.from_bytes(self.__socket_dados.recv(4), "big", signed=True)
                         filme.nota = novo_nota
-                        resposta = f"Filme ID {id} atualizado com sucesso para a nota {novo_nota}!".encode()
+                        resposta = (1).to_bytes(4, "big", signed=True)
                         self.__socket_dados.send(resposta)
                         break
                 else:
-                    resposta = f"Filme ID {id} não encontrado!".encode()
+                    resposta = (0).to_bytes(4, "big", signed=True)
                     self.__socket_dados.send(resposta)
 
             elif funcao == 'd':  # Deletar um filme
@@ -67,18 +71,18 @@ class AtendimentoCliente(Thread):
                 for filme in filmes:
                     if filme.id == id:
                         filmes.remove(filme)
-                        resposta = f"Filme ID {id} deletado com sucesso!".encode()
+                        resposta = (1).to_bytes(4, "big", signed=True)
                         self.__socket_dados.send(resposta)
                         break
                 else:
-                    resposta = f"Filme ID {id} não encontrado!".encode()
+                    resposta = (0).to_bytes(4, "big", signed=True)
                     self.__socket_dados.send(resposta)
 
             elif funcao == 's':  # Encerrar conexão
                 self.__socket_dados.close()
 
             else:  # Se o cliente enviar algum código errado
-                resposta = 'Comando inválido!'.encode()
+                resposta = (0).to_bytes(4, "big", signed=True)
                 self.__socket_dados.send(resposta)
 
 def main():

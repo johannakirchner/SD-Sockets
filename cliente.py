@@ -1,56 +1,74 @@
 import socket
 
-def enviar_comando(socket_cliente, comando):
-    socket_cliente.send(comando.encode())
+def codificar_comando(comando):
+    return comando.encode()
 
-def enviar_inteiro(socket_cliente, valor):
-    socket_cliente.send(valor.to_bytes(4, "big", signed=True))
+def codificar_inteiro(valor):
+    return valor.to_bytes(4, "big", signed=True)
 
-def enviar_string(socket_cliente, valor):
-    socket_cliente.send(len(valor).to_bytes(4, "big", signed=True))  # Envia o comprimento da string
-    socket_cliente.send(valor.encode())  # Envia a string
+def codificar_string(valor):
+    mensagem = len(valor).to_bytes(4, "big", signed=True)  # Envia o comprimento da string
+    mensagem += valor.encode()  # Envia a string
+    return mensagem
 
 def receber_resposta(socket_cliente):
-    resposta = socket_cliente.recv(1024)  # Recebe a resposta (limite de 1024 bytes)
-    print(resposta.decode())
+    resposta = int.from_bytes(socket_cliente.recv(4), "big", signed=True)
+    if resposta == 1:
+        print("Operacao realizada com sucesso")
+    else:
+        print("Erro na operacao")
+
+def receber_lista(socket_cliente):
+    print("Aqui esta sua lista de filmes")
+    tam_lista = int.from_bytes(socket_cliente.recv(4), "big", signed=True)
+    for i in range(tam_lista):
+        tam_item = int.from_bytes(socket_cliente.recv(4), "big", signed=True)
+        info = socket_cliente.recv(tam_item).decode()
+        print(info)
 
 def criar_filme(socket_cliente):
     titulo = input("Digite o título do filme: ")
     genero = input("Digite o genero do filme: ")
     ano = int(input("Digite o ano do filme: "))
-    nota = -1
-    nota = int(input("Digite o nota do filme ou pressione enter para nao adicionar nota: "))
-    
+    nota = input("Digite a nota do filme ou pressione enter para nao adicionar nota: ")
+    if nota == "":
+        nota = -1
+    else:
+        nota = int(nota)
 
-    enviar_comando(socket_cliente, 'c')
-    enviar_inteiro(socket_cliente, id)
-    enviar_string(socket_cliente, titulo)
-    enviar_inteiro(socket_cliente, ano)
-    
+    mensagem = codificar_comando('c')
+    mensagem += codificar_string(titulo)
+    mensagem += codificar_string(genero)
+    mensagem += codificar_inteiro(ano)
+    mensagem += codificar_inteiro(nota)
+
+    socket_cliente.send(mensagem)
     receber_resposta(socket_cliente)
 
 def listar_filmes(socket_cliente):
-    enviar_comando(socket_cliente, 'r')
-    receber_resposta(socket_cliente)
+    mensagem = codificar_comando('r')
+    socket_cliente.send(mensagem)
+    receber_lista(socket_cliente)
 
 def atualizar_filme(socket_cliente):
+    listar_filmes(socket_cliente)
     id = int(input("Digite o ID do filme a ser atualizado: "))
-    novo_titulo = input("Digite o novo título do filme: ")
-    novo_ano = int(input("Digite o novo ano do filme: "))
+    nova_nota = int(input("Digite a nova nota do filme: "))
     
-    enviar_comando(socket_cliente, 'u')
-    enviar_inteiro(socket_cliente, id)
-    enviar_string(socket_cliente, novo_titulo)
-    enviar_inteiro(socket_cliente, novo_ano)
-    
+    mensagem = codificar_comando('u')
+    mensagem += codificar_inteiro(id)
+    mensagem += codificar_inteiro(nova_nota)
+    socket_cliente.send(mensagem)
+
     receber_resposta(socket_cliente)
 
 def deletar_filme(socket_cliente):
     id = int(input("Digite o ID do filme a ser deletado: "))
     
-    enviar_comando(socket_cliente, 'd')
-    enviar_inteiro(socket_cliente, id)
-    
+    mensagem = codificar_comando('d')
+    mensagem += codificar_inteiro(id)
+    socket_cliente.send(mensagem)
+
     receber_resposta(socket_cliente)
 
 def main():
