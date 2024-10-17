@@ -1,5 +1,5 @@
 Alunos: Gabriel de O. e S. P. Barreto RA: 2326221
-	Johanna Kirchner RA:
+	Johanna Kirchner 	      RA: 2265010
 
 Ideia: Decidimos fazer uma lista de filmes remota, de forma que o cliente possa realizar todas as funções CRUD através da troca de mensagens com o servidor.
 Os campos de cada filme são: ID(int), nome(String), genero(String), ano(int), nota(int)
