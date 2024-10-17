@@ -96,6 +96,7 @@ class AtendimentoCliente(Thread):
             elif funcao == 'd':  # Deletar um filme
                 self.__remover_filme()
             elif funcao == 's':  # Encerrar conexão
+                self.__enviar_resposta(True)
                 self.__socket_dados.close()
             else:  # Se o cliente enviar algum código errado
                 self.__enviar_resposta(False)
