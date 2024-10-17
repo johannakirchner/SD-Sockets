@@ -1,84 +1,93 @@
 import socket
 
-def codificar_comando(comando):
-    return comando.encode()
+class Client:
+    def __init__(self, ip = "127.0.0.1", porta =50000):
+        self.__endereco_ip = ip
+        self.__porta = porta
 
-def codificar_inteiro(valor):
-    return valor.to_bytes(4, "big", signed=True)
+        self.__socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.__socket.connect((self.__endereco_ip, self.__porta))
 
-def codificar_string(valor):
-    mensagem = len(valor).to_bytes(4, "big", signed=True)  # Envia o comprimento da string
-    mensagem += valor.encode()  # Envia a string
-    return mensagem
+    @staticmethod
+    def __codificar_comando(comando):
+        return comando.encode()
 
-def receber_resposta(socket_cliente):
-    resposta = int.from_bytes(socket_cliente.recv(4), "big", signed=True)
-    if resposta == 1:
-        print("Operacao realizada com sucesso")
-    else:
-        print("Erro na operacao")
+    @staticmethod
+    def __codificar_inteiro(valor):
+        return valor.to_bytes(4, "big", signed=True)
 
-def receber_lista(socket_cliente):
-    print("Aqui esta sua lista de filmes")
-    tam_lista = int.from_bytes(socket_cliente.recv(4), "big", signed=True)
-    for i in range(tam_lista):
-        tam_item = int.from_bytes(socket_cliente.recv(4), "big", signed=True)
-        info = socket_cliente.recv(tam_item).decode()
-        print(info)
+    @staticmethod
+    def __codificar_string(valor):
+        mensagem = len(valor).to_bytes(4, "big", signed=True)
+        mensagem += valor.encode()
+        return mensagem
 
-def criar_filme(socket_cliente):
-    titulo = input("Digite o título do filme: ")
-    genero = input("Digite o genero do filme: ")
-    ano = int(input("Digite o ano do filme: "))
-    nota = input("Digite a nota do filme ou pressione enter para nao adicionar nota: ")
-    if nota == "":
-        nota = -1
-    else:
-        nota = int(nota)
+    def receber_resposta(self): ## Respostas sao 0 ou 1 apenas, se 1 a operacao anterior deu certo, 0 caso contrario
+        resposta = int.from_bytes(self.__socket.recv(4), "big", signed=True)
+        if resposta == 1:
+            print("Operacao realizada com sucesso")
+        else:
+            print("Erro na operacao")
 
-    mensagem = codificar_comando('c')
-    mensagem += codificar_string(titulo)
-    mensagem += codificar_string(genero)
-    mensagem += codificar_inteiro(ano)
-    mensagem += codificar_inteiro(nota)
+    def receber_lista(self):
+        print("Aqui esta sua lista de filmes")
+        tam_lista = int.from_bytes(self.__socket.recv(4), "big", signed=True)
+        for i in range(tam_lista):
+            tam_item = int.from_bytes(self.__socket.recv(4), "big", signed=True)
+            info = self.__socket.recv(tam_item).decode()
+            print(info)
 
-    socket_cliente.send(mensagem)
-    receber_resposta(socket_cliente)
+    def criar_filme(self):
+        titulo = input("Digite o título do filme: ")
+        genero = input("Digite o genero do filme: ")
+        ano = int(input("Digite o ano do filme: "))
+        nota = input("Digite a nota do filme ou pressione enter para nao adicionar nota: ")
+        if nota == "":
+            nota = -1
+        else:
+            nota = int(nota)
 
-def listar_filmes(socket_cliente):
-    mensagem = codificar_comando('r')
-    socket_cliente.send(mensagem)
-    receber_lista(socket_cliente)
+        mensagem = self.__codificar_comando('c')
+        mensagem += self.__codificar_string(titulo)
+        mensagem += self.__codificar_string(genero)
+        mensagem += self.__codificar_inteiro(ano)
+        mensagem += self.__codificar_inteiro(nota)
 
-def atualizar_filme(socket_cliente):
-    listar_filmes(socket_cliente)
-    id = int(input("Digite o ID do filme a ser atualizado: "))
-    nova_nota = int(input("Digite a nova nota do filme: "))
-    
-    mensagem = codificar_comando('u')
-    mensagem += codificar_inteiro(id)
-    mensagem += codificar_inteiro(nova_nota)
-    socket_cliente.send(mensagem)
+        self.__socket.send(mensagem)
+        self.receber_resposta()
 
-    receber_resposta(socket_cliente)
+    def listar_filmes(self):
+        mensagem = self.__codificar_comando('r')
+        self.__socket.send(mensagem)
+        self.receber_lista()
 
-def deletar_filme(socket_cliente):
-    id = int(input("Digite o ID do filme a ser deletado: "))
-    
-    mensagem = codificar_comando('d')
-    mensagem += codificar_inteiro(id)
-    socket_cliente.send(mensagem)
+    def atualizar_filme(self):
+        self.listar_filmes()
+        id = int(input("Digite o ID do filme a ser atualizado: "))
+        nova_nota = int(input("Digite a nova nota do filme: "))
 
-    receber_resposta(socket_cliente)
+        mensagem = self.__codificar_comando('u')
+        mensagem += self.__codificar_inteiro(id)
+        mensagem += self.__codificar_inteiro(nova_nota)
+        self.__socket.send(mensagem)
+
+        self.receber_resposta()
+
+    def deletar_filme(self):
+        id = int(input("Digite o ID do filme a ser deletado: "))
+        mensagem = self.__codificar_comando('d')
+        mensagem += self.__codificar_inteiro(id)
+        self.__socket.send(mensagem)
+
+        self.receber_resposta()
+
+    def encerrar_conexao(self):
+        self.__socket.send(self.__codificar_comando('s'))
+        self.receber_resposta()
+        self.__socket.close()
 
 def main():
-    ip = '127.0.0.1'
-    porta = 50000
-    destino = (ip, porta)
-    
-    socket_cliente = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    socket_cliente.connect(destino)
-
+    cliente = Client()
     while True:
         print("\nEscolha uma operação:")
         print("1. Criar filme")
@@ -90,16 +99,15 @@ def main():
         opcao = input("Digite sua escolha: ")
         
         if opcao == '1':
-            criar_filme(socket_cliente)
+            cliente.criar_filme()
         elif opcao == '2':
-            listar_filmes(socket_cliente)
+            cliente.listar_filmes()
         elif opcao == '3':
-            atualizar_filme(socket_cliente)
+            cliente.atualizar_filme()
         elif opcao == '4':
-            deletar_filme(socket_cliente)
+            cliente.deletar_filme()
         elif opcao == '5':
-            enviar_comando(socket_cliente, 's')
-            socket_cliente.close()
+            cliente.encerrar_conexao()
             print("Conexão encerrada.")
             break
         else:
