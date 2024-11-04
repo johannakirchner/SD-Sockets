@@ -1,9 +1,7 @@
-import socket
-import string
-from threading import Thread
+import Pyro5.server, Pyro5.core
 
 class Filme:
-    def __init__(self, id:int, titulo:string, genero:string, ano:int, nota:int):
+    def __init__(self, id: int, titulo: str, genero: str, ano: int, nota: float):
         self.id = id
         self.titulo = titulo
         self.genero = genero
@@ -13,69 +11,40 @@ class Filme:
     def __str__(self):
         return f"ID: {self.id}, Título: {self.titulo}, Genero: {self.genero}, Ano: {self.ano}, Nota: {self.nota}"
 
-class AtendimentoCliente(Thread):
 
-    def __init__(self, socket_dados:socket.socket):
-        super().__init__()
-        self.__socket_dados = socket_dados
+@Pyro5.server.expose
+class BancoDeFilmes:
+    def __init__(self):
         self.__filmes = []
 
-    def __get_message_info(self, length):
-        message = self.__socket_dados.recv(length).decode()
-        return message
-
-    def __get_message_number(self):
-        return int.from_bytes(self.__socket_dados.recv(4), "big", signed=True)
-
-    def __criar_filme(self):
+    def __criar_filme(self, titulo: str, genero: str, ano: int, nota: float = 0.0):
         id = len(self.__filmes)
-        titulo_len = self.__get_message_number()
-        titulo = self.__get_message_info(titulo_len)
-        genero_len = self.__get_message_number()
-        genero = self.__get_message_info(genero_len)
-        ano = self.__get_message_number()
-        nota = self.__get_message_number()
         self.__filmes.append(Filme(id=id, titulo=titulo, ano=ano, genero=genero, nota=nota))
+        print("Filme adicionado com sucesso")
 
     def __listar_filmes(self):
-        # Envia primeiro o tamanho da lista de filmes. Para cada filme...
-        # envia uma string com suas informacoes e o tamanho da string (tamanho vem antes)
-
-        resposta = len(self.__filmes).to_bytes(4, "big", signed=True)
+        lista = []
         for movie in self.__filmes:
-            aux_str = str(movie).encode()
-            aux_tam = len(aux_str).to_bytes(4, "big", signed=True)
-            resposta += aux_tam
-            resposta += aux_str
-        self.__socket_dados.send(resposta)
+            lista.append(movie.__str__())
+        return lista
 
-    def __editar_filme(self):
-        id = self.__get_message_number()
-        nova_nota = self.__get_message_number() ## Consome a mensagem inteira, caso o filme não seja encontrado, nao fode o buffer/proximas mensagens
+    def __editar_filme(self, id: int, nova_nota: float):
         for filme in self.__filmes:
             if filme.id == id:
                 filme.nota = nova_nota
-                self.__enviar_resposta(True)
+                print("Operação realizada com sucesso!")
                 break
         else:
-            self.__enviar_resposta(False)
+            print("A operação falhou!")
 
-    def __remover_filme(self):
-        id = self.__get_message_number()
+    def __remover_filme(self, id):
         for filme in self.__filmes:
             if filme.id == id:
                 self.__filmes.remove(filme)
-                self.__enviar_resposta(True)
+                print("Operação realizada com sucesso!")
                 break
         else:
-            self.__enviar_resposta(False)
-
-    def __enviar_resposta(self, msg: bool):
-        if msg:
-            resposta = (1).to_bytes(4, "big", signed=True)
-        else:
-            resposta = (0).to_bytes(4, "big", signed=True)
-        self.__socket_dados.send(resposta)
+            print("A operação falhou!")
 
     def run(self):
         funcao = None
@@ -102,18 +71,14 @@ class AtendimentoCliente(Thread):
                 self.__enviar_resposta(False)
 
 def main():
-    socket_conexao = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    ip = '127.0.0.1'
-    porta = 50000
+    daemon = Pyro5.server.Daemon()
+    uri = daemon.register(BancoDeFilmes)
+    print("URI do objeto: ", uri)
 
-    destino = (ip,porta)
-    socket_conexao.bind(destino)
-    socket_conexao.listen(10)
+    ns = Pyro5.core.locate_ns()
+    ns.register("bancofilmes", uri)
+    daemon.requestLoop()
 
-    while True:
-        socket_dados, info_cliente = socket_conexao.accept()
-        thread = AtendimentoCliente(socket_dados)
-        thread.start()
 
 if __name__ == '__main__':
     main()
