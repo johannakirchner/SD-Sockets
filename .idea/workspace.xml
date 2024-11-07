@@ -5,17 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0e835540-144e-4023-b095-53e715825590" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/classes.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cliente.py" beforeDir="false" afterPath="$PROJECT_DIR$/cliente.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/descricao_projeto.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cliente_tcp.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/server.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/socketsAula2.zip" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/socketsAula2/clienteTCP_simples.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/socketsAula2/clienteUDP_simples.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/socketsAula2/servidorMultiplo.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/socketsAula2/servidorTCP_simples.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/socketsAula2/servidorUDP_simples.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/server_tcp.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -42,9 +37,12 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Python.cliente.executor": "Run",
+    "Python.server.executor": "Run",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "Trab2__RMI__Pyro",
+    "ignore.virus.scanning.warn.message": "true",
     "settings.editor.selected.configurable": "com.jetbrains.python.documentation.PythonDocumentationConfigurable"
   }
 }]]></component>

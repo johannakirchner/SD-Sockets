@@ -1,10 +1,22 @@
 import sys
 import Pyro5.client, Pyro5.errors
 
+def criar_filme(banco_filmes):
+    titulo = input("Digite o nome do filme: ")
+    genero = input("Digite o genero do filme: ")
+    ano = input("Digite o ano do filme: ")
+    nota = input("Digite a nota do filme ou deixe em branco")
+    if not nota:
+        nota = -1
+    banco_filmes.criar_filme(titulo, genero, ano, nota)
+
+def listar_filmes(banco_filmes):
+    print("Aqui esta sua lista de filmes:")
+    for filme in banco_filmes.listar_filmes():
+        print(filme)
 
 def main():
     banco_filmes = Pyro5.client.Proxy("PYRONAME:bancofilmes")
-
     try:
         banco_filmes._pyroBind()
     except Pyro5.errors.CommunicationError:
@@ -22,9 +34,9 @@ def main():
         opcao = input("Digite sua escolha: ")
         
         if opcao == '1':
-            banco_filmes.criar_filme()
+            criar_filme(banco_filmes)
         elif opcao == '2':
-            banco_filmes.listar_filmes()
+            listar_filmes(banco_filmes)
         elif opcao == '3':
             banco_filmes.atualizar_filme()
         elif opcao == '4':
