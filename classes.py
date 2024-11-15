@@ -24,17 +24,19 @@ def filme_class_to_dict(obj: Filme):
     return movieDict
 
 def filme_dict_to_class(dict):
-    a = Filme(dict["id"], dict["titulo"], dict["genero"], dict["ano"], dict["bota"])
+    a = Filme(dict["id"], dict["titulo"], dict["genero"], dict["ano"], dict["nota"])
     return a
 
 
 @Pyro5.server.expose
 class BancoDeFilmes:
+    __next_id = 0
     def __init__(self):
         self.__filmes = []
 
     def criar_filme(self, titulo: str, genero: str, ano: int, nota: float = -1.0):
-        id = len(self.__filmes)
+        id = BancoDeFilmes.__next_id
+        BancoDeFilmes.__next_id += 1
         self.__filmes.append(Filme(id=id, titulo=titulo, ano=ano, genero=genero, nota=nota))
         print("Filme adicionado com sucesso")
 
@@ -61,3 +63,6 @@ class BancoDeFilmes:
                 break
         else:
             print("A operação falhou!")
+    
+    def encerrar_conexao(self):
+        print("Conexão encerrada pelo cliente.")

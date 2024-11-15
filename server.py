@@ -11,8 +11,9 @@ def main():
     print("URI do objeto: ", uri)
 
     ns = Pyro5.core.locate_ns()
-    ns.register("bancofilmes", uri)
+    ns.register("bancofilmes_gabriel_johanna", uri)
     print("Objeto registrado no servico de nome")
+    input("Pressione enter para entrar no loop de requisições...")
 
     daemon.requestLoop()
 
