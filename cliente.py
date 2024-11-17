@@ -9,6 +9,8 @@ def criar_filme(banco_filmes):
     if not nota:
         nota = -1
     banco_filmes.criar_filme(titulo, genero, ano, nota)
+    print("Método criar_filme executado. Pressione enter para continuar...")
+    input()
 
 def atualizar_filme(banco_filmes):
     id_filme = int(input("Digite o ID do filme que deseja atualizar: "))
@@ -29,7 +31,7 @@ def main():
     input("Chamada método de proxy...(pressione enter)")
     try:
         banco_filmes._pyroBind()
-        input("Bind...(pressione enter)")
+        input("Proxy associoado ao nameservice...(pressione enter)")
     except Pyro5.errors.CommunicationError:
         print("Objeto remoto nao encontrado. Encerrando execucao")
         sys.exit(1)

@@ -7,7 +7,8 @@ from classes import BancoDeFilmes
 def main():
     daemon = Pyro5.server.Daemon()
     uri = daemon.register(BancoDeFilmes)
-    print("Objeto servidor publicado")
+    print("Objeto servidor publicado. Pressione enter...")
+    input()
     print("URI do objeto: ", uri)
 
     ns = Pyro5.core.locate_ns()
