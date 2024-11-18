@@ -1,5 +1,5 @@
 import Pyro5.server
-
+from Pyro5.serializers import SerializerBase
 
 class Filme:
     def __init__(self, id: int, titulo: str, genero: str, ano: int, nota: float):
@@ -41,10 +41,12 @@ class BancoDeFilmes:
         print("Filme adicionado com sucesso")
 
     def listar_filmes(self):
-        lista = []
-        for movie in self.__filmes:
-            lista.append(movie.__str__())
-        return lista
+        try:
+            lista = [movie.__str__() for movie in self.__filmes]
+            return lista
+        except Exception as e:
+            print(f"Erro ao listar filmes: {e}")
+            return []
 
     def editar_filme(self, id: int, nova_nota: float):
         for filme in self.__filmes:
@@ -66,3 +68,9 @@ class BancoDeFilmes:
     
     def encerrar_conexao(self):
         print("Conexão encerrada pelo cliente.")
+
+    def registrar_serializadores():
+        from Pyro5.serializers import SerializerBase
+        SerializerBase.register_class_to_dict(Filme, filme_class_to_dict)
+        SerializerBase.register_dict_to_class("objeto.Filme", filme_dict_to_class)
+

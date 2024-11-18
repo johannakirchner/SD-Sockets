@@ -5,6 +5,8 @@ from classes import BancoDeFilmes
 
 
 def main():
+    BancoDeFilmes.registrar_serializadores()
+    
     daemon = Pyro5.server.Daemon()
     uri = daemon.register(BancoDeFilmes)
     print("Objeto servidor publicado. Pressione enter...")

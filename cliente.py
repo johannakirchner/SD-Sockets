@@ -22,9 +22,15 @@ def deletar_filme(banco_filmes):
     banco_filmes.remover_filme(id_filme)
 
 def listar_filmes(banco_filmes):
-    print("\nAqui esta sua lista de filmes:")
-    for filme in banco_filmes.listar_filmes():
+    print("\nAqui está sua lista de filmes:")
+    filmes = banco_filmes.listar_filmes()  
+    if filmes is None:  
+        print("Erro ao listar filmes. Nenhum dado foi retornado.")
+        return
+    for filme in filmes:
         print(filme)
+
+
 
 def main():
     banco_filmes = Pyro5.client.Proxy("PYRONAME:bancofilmes_gabriel_johanna")
