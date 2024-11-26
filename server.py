@@ -17,7 +17,7 @@ def main():
 
     conf = {'/': {'request.dispatch': desp}}
     cp.tree.mount(root=None, config=conf, )
-    cp.config.update({'server.socket_port': 9090})
+    cp.config.update({'server.socket_port': 9091})
     cp.engine.start()
     cp.engine.block()
 
