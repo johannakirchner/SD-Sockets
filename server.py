@@ -8,6 +8,7 @@ def realizar_conexoes(desp):
     desp.connect(name='MovieList', route='/filme', controller=banco, action='listar_filmes', conditions=dict(method=['GET']))
     desp.connect(name='MovieEdit', route='/filme/:id', controller=banco, action='editar_filme', conditions=dict(method=['PATCH']))
     desp.connect(name='MovieRemove', route='/filme/:id', controller=banco, action='remover_filme', conditions=dict(method=['DELETE']))
+    desp.connect(name='MovieGenre', route='/filme/:genero', controller=banco, action='listar_genero', conditions=dict(method=['GET']))
 
 
 def main():
